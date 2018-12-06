@@ -26,7 +26,8 @@ void idt_init(void) {
     extern void __alltraps(void);
     /* Set sscratch register to 0, indicating to exception vector that we are
      * presently executing in the kernel */
-    write_csr(sscratch, 0);
+    // write_csr(sscratch, 0);
+    asm volatile ("csrrwi x0, sscratch, %0": : "i"(0));
     /* Set the exception vector address */
     write_csr(stvec, &__alltraps);
 }
