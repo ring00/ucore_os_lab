@@ -7,7 +7,7 @@ $ bash build-llvm.sh
 ```
 
 All necessary tools including GCC, Clang and QEMU will be installed in `riscv/_install`.
-You can add them to your `PATH` environment variable by executing `export $(pwd)/riscv/_install/bin:$PATH`.
+You can add them to your `PATH` environment variable by executing `export PATH=$(pwd)/riscv/_install/bin:$PATH`.
 
 ## Build uCore
 
