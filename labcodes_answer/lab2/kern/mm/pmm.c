@@ -467,8 +467,6 @@ static void check_boot_pgdir(void) {
 
     const char *str = "ucore: Hello world!!";
     strcpy((void *)0x100, str);
-    cprintf("-- szx (void *)0x100:%s\n",(void *)0x100);
-    cprintf("-- szx (void *)(0x100 + PGSIZE):%s\n",(void *)(0x100 + PGSIZE));
     assert(strcmp((void *)0x100, (void *)(0x100 + PGSIZE)) == 0);
 
     *(char *)(page2kva(p) + 0x100) = '\0';
@@ -507,15 +505,11 @@ static const char *perm2str(int perm) {
 static int get_pgtable_items(size_t left, size_t right, size_t start,
                              uintptr_t *table, size_t *left_store,
                              size_t *right_store) {
-	cprintf("-- szx get_pgtable_items: in start:%d, right:%d --\n",start,right);
     if (start >= right) {
-    	cprintf("-- szx get_pgtable_items: out start>=right\n");
         return 0;
     }
-    cprintf("-- szx table[%d]:%p \n",start,table);
     while (start < right && !(table[start] & PTE_V)) {
         start++;
-        cprintf("-- szx start1:%d --\n",start);
     }
     if (start < right) {
         if (left_store != NULL) {
@@ -524,15 +518,12 @@ static int get_pgtable_items(size_t left, size_t right, size_t start,
         int perm = (table[start++] & PTE_USER);
         while (start < right && (table[start] & PTE_USER) == perm) {
             start++;
-            cprintf("-- szx start2:%d --\n",start);
         }
         if (right_store != NULL) {
             *right_store = start;
         }
         return perm;
-    	cprintf("-- szx get_pgtable_items: out perm:%x --\n",perm);
     }
-	cprintf("-- szx get_pgtable_items: out return 0\n");
     return 0;
 }
 
