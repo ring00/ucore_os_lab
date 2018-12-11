@@ -33,8 +33,10 @@ cd llvm/tools
 # git clone https://git.llvm.org/git/clang.git
 git clone https://mirrors.tuna.tsinghua.edu.cn/git/llvm/clang.git
 cd ..
-wget https://gist.githubusercontent.com/ring00/b3b35d7e5f0971ecd48ff566ea4cf12d/raw/4cba7bde71788236c2d6f6f8407592d24d69fda4/mcmodel.patch
-patch -p0 < mcmodel.patch
+# [RISCV] Properly evaluate fixup_riscv_pcrel_lo12: https://reviews.llvm.org/D54029
+# [WIP, RISCV] Generate address sequences suitable for mcmodel=medium: https://reviews.llvm.org/D54143
+wget https://gist.githubusercontent.com/ring00/b3b35d7e5f0971ecd48ff566ea4cf12d/raw/814f91bd4e92d7f4c972bdbbf1e90c27fc9bc802/0001-Codegen-for-mcmodel-medium.patch
+patch -p0 < 0001-Codegen-for-mcmodel-medium.patch
 mkdir build && cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
