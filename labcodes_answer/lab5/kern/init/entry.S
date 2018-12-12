@@ -4,7 +4,7 @@
     .section .text,"ax",%progbits
     .globl kern_entry
 kern_entry:
-    la sp, bootstacktop
+    lla sp, bootstacktop
 
     tail kern_init
 

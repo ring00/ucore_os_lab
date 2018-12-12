@@ -15,16 +15,16 @@
  * */
 
 static const char * const error_string[MAXERROR + 1] = {
-    [0]                     NULL,
-    [E_UNSPECIFIED]         "unspecified error",
-    [E_BAD_PROC]            "bad process",
-    [E_INVAL]               "invalid parameter",
-    [E_NO_MEM]              "out of memory",
-    [E_NO_FREE_PROC]        "out of processes",
-    [E_FAULT]               "segmentation fault",
-    [E_INVAL_ELF]           "invalid elf file",
-    [E_KILLED]              "process is killed",
-    [E_PANIC]               "panic failure",
+    [0]              = NULL,
+    [E_UNSPECIFIED]  = "unspecified error",
+    [E_BAD_PROC]     = "bad process",
+    [E_INVAL]        = "invalid parameter",
+    [E_NO_MEM]       = "out of memory",
+    [E_NO_FREE_PROC] = "out of processes",
+    [E_FAULT]        = "segmentation fault",
+    [E_INVAL_ELF]    = "invalid elf file",
+    [E_KILLED]       = "process is killed",
+    [E_PANIC]        = "panic failure",
 };
 
 /* *

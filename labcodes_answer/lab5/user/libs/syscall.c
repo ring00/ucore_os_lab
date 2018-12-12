@@ -10,25 +10,25 @@ syscall(int num, ...) {
     va_list ap;
     va_start(ap, num);
     uint64_t a[MAX_ARGS];
-    int i, ret;
-    for (i = 0; i < MAX_ARGS; i ++) {
+    for (int i = 0; i < MAX_ARGS; i++) {
         a[i] = va_arg(ap, uint64_t);
     }
     va_end(ap);
 
+    register uintptr_t a0 asm ("a0") = (uintptr_t)(num);
+    register uintptr_t a1 asm ("a1") = (uintptr_t)(a[0]);
+    register uintptr_t a2 asm ("a2") = (uintptr_t)(a[1]);
+    register uintptr_t a3 asm ("a3") = (uintptr_t)(a[2]);
+    register uintptr_t a4 asm ("a4") = (uintptr_t)(a[3]);
+    register uintptr_t a5 asm ("a5") = (uintptr_t)(a[4]);
     asm volatile (
-        "ld a0, %1\n"
-        "ld a1, %2\n"
-        "ld a2, %3\n"
-        "ld a3, %4\n"
-        "ld a4, %5\n"
-    	"ld a5, %6\n"
-        "ecall\n"
-        "sd a0, %0"
-        : "=m" (ret)
-        : "m"(num), "m"(a[0]), "m"(a[1]), "m"(a[2]), "m"(a[3]), "m"(a[4])
-        :"memory");
-    return ret;
+        "ecall"
+        : "+r"(a0)
+        : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5)
+        : "memory"
+    );
+
+    return a0;
 }
 
 int
