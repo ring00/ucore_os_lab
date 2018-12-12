@@ -29,8 +29,8 @@ HOSTCFLAGS	:= -Wall -O2
 
 GDB		:= $(GCCPREFIX)gdb
 
-CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused
+CC		:= clang
+CFLAGS  := -mcmodel=medium -march=rv64ima -mabi=lp64 -std=gnu99 -Wno-unused
 CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
@@ -182,7 +182,7 @@ $(SFSROOT):
 	$(V)$(MKDIR) $@
 
 $(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1kB count=480
+	$(V)dd if=/dev/zero of=$@ bs=1kB count=640
 	@$(call totarget,mksfs) $@ $(SFSROOT)
 
 $(call create_target,sfs.img)
