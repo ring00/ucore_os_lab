@@ -29,15 +29,15 @@ HOSTCFLAGS	:= -Wall -O2
 
 GDB		:= $(GCCPREFIX)gdb
 
-CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -O2 -s -std=gnu99 -Wall -Wextra
-CFLAGS	+= -fno-builtin -nostdinc $(DEFS)
+CC		:= clang
+CFLAGS  := -mcmodel=medium -march=rv64ima -mabi=lp64 -std=gnu99 -Wno-unused
+CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
 
-LD      := $(GCCPREFIX)ld
-LDFLAGS	:= -m elf64lriscv
-LDFLAGS	+= -nostdlib --gc-sections
+LD      := $(GCCPREFIX)gcc
+LDFLAGS	:= -march=rv64ima -mabi=lp64
+LDFLAGS	+= -nostartfiles -nostdlib -static -lgcc
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
@@ -122,7 +122,7 @@ $(kernel): tools/kernel.ld
 
 $(kernel): $(KOBJS)
 	@echo + ld $@
-	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS)
+	$(V)$(LD) -T tools/kernel.ld -o $@ $(KOBJS) $(LDFLAGS)
 	@$(OBJDUMP) -S $@ > $(call asmfile,kernel)
 	@$(OBJDUMP) -t $@ | $(SED) '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(call symfile,kernel)
 
@@ -132,7 +132,7 @@ $(call create_target,kernel)
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
