@@ -149,7 +149,7 @@ static void page_init(void) {
 }
 
 static void enable_paging(void) {
-    write_csr(satp, 0x8000000000000000 | (boot_cr3 >> RISCV_PGSHIFT));
+    lcr3(boot_cr3);
 }
 
 // boot_map_segment - setup&enable the paging mechanism
