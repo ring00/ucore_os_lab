@@ -11,10 +11,7 @@ You can add them to your `PATH` environment variable by executing `export PATH=$
 
 ## Build uCore
 
-### 1. build lab1
-
 ```bash
-$ cd labcodes_answer/lab1
-$ make
-$ make qemu # The kernel cannot run properly due to codegen errors in LLVM
+$ cd labcodes_answer
+$ ./clangbuildall.sh
 ```
