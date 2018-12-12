@@ -9,43 +9,26 @@ static inline int
 syscall(int num, ...) {
     va_list ap;
     va_start(ap, num);
-    uint32_t a[MAX_ARGS];
-    int i, ret;
-    for (i = 0; i < MAX_ARGS; i ++) {
-        a[i] = va_arg(ap, uint32_t);
+    uint64_t a[MAX_ARGS];
+    for (int i = 0; i < MAX_ARGS; i++) {
+        a[i] = va_arg(ap, uint64_t);
     }
     va_end(ap);
 
-    // asm volatile (
-    //     "int %1;"
-    //     : "=a" (ret)
-    //     : "i" (T_SYSCALL),
-    //       "a" (num),
-    //       "d" (a[0]),
-    //       "c" (a[1]),
-    //       "b" (a[2]),
-    //       "D" (a[3]),
-    //       "S" (a[4])
-    //     : "cc", "memory");
+    register uintptr_t a0 asm ("a0") = (uintptr_t)(num);
+    register uintptr_t a1 asm ("a1") = (uintptr_t)(a[0]);
+    register uintptr_t a2 asm ("a2") = (uintptr_t)(a[1]);
+    register uintptr_t a3 asm ("a3") = (uintptr_t)(a[2]);
+    register uintptr_t a4 asm ("a4") = (uintptr_t)(a[3]);
+    register uintptr_t a5 asm ("a5") = (uintptr_t)(a[4]);
     asm volatile (
-        "lw a0, %1\n"
-        "lw a1, %2\n"
-        "lw a2, %3\n"
-        "lw a3, %4\n"
-        "lw a4, %5\n"
-        "lw a5, %6\n"
-        "ecall\n"
-        "sw a0, %0"
-        : "=m" (ret)
-        : "m" (num),
-          "m" (a[0]),
-          "m" (a[1]),
-          "m" (a[2]),
-          "m" (a[3]),
-          "m" (a[4])
+        "ecall"
+        : "+r"(a0)
+        : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5)
         : "memory"
-      );
-    return ret;
+    );
+
+    return a0;
 }
 
 int

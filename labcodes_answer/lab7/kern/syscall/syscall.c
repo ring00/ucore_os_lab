@@ -84,18 +84,18 @@ sys_sleep(uint64_t arg[]) {
 }
 
 static int (*syscalls[])(uint64_t arg[]) = {
-    [SYS_exit]              sys_exit,
-    [SYS_fork]              sys_fork,
-    [SYS_wait]              sys_wait,
-    [SYS_exec]              sys_exec,
-    [SYS_yield]             sys_yield,
-    [SYS_kill]              sys_kill,
-    [SYS_getpid]            sys_getpid,
-    [SYS_putc]              sys_putc,
-    [SYS_pgdir]             sys_pgdir,
-    [SYS_gettime]           sys_gettime,
-    [SYS_lab6_set_priority] sys_lab6_set_priority,
-    [SYS_sleep]             sys_sleep,
+    [SYS_exit]              = sys_exit,
+    [SYS_fork]              = sys_fork,
+    [SYS_wait]              = sys_wait,
+    [SYS_exec]              = sys_exec,
+    [SYS_yield]             = sys_yield,
+    [SYS_kill]              = sys_kill,
+    [SYS_getpid]            = sys_getpid,
+    [SYS_putc]              = sys_putc,
+    [SYS_pgdir]             = sys_pgdir,
+    [SYS_gettime]           = sys_gettime,
+    [SYS_lab6_set_priority] = sys_lab6_set_priority,
+    [SYS_sleep]             = sys_sleep,
 };
 
 #define NUM_SYSCALLS        ((sizeof(syscalls)) / (sizeof(syscalls[0])))
