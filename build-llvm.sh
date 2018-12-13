@@ -44,6 +44,7 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=False \
   -DDEFAULT_SYSROOT="../../_install/riscv64-unknown-elf" \
   -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-elf" \
+  -DLLVM_TARGETS_TO_BUILD="" \
   -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" ../
 cmake --build . --target install
 cd ../..
