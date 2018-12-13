@@ -36,7 +36,7 @@ cd ..
 # [RISCV] Properly evaluate fixup_riscv_pcrel_lo12: https://reviews.llvm.org/D54029
 # [WIP, RISCV] Generate address sequences suitable for mcmodel=medium: https://reviews.llvm.org/D54143
 wget https://gist.githubusercontent.com/ring00/b3b35d7e5f0971ecd48ff566ea4cf12d/raw/814f91bd4e92d7f4c972bdbbf1e90c27fc9bc802/0001-Codegen-for-mcmodel-medium.patch
-patch -p0 < 0001-Codegen-for-mcmodel-medium.patch
+git apply 0001-Codegen-for-mcmodel-medium.patch
 mkdir build && cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
