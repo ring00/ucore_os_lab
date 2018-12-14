@@ -15,3 +15,9 @@ You can add them to your `PATH` environment variable by executing `export PATH=$
 $ cd labcodes_answer
 $ ./clangbuildall.sh
 ```
+## Run uCore
+
+```bash
+$ cd lab8
+$ make qemu
+```
