@@ -9,7 +9,8 @@ sudo apt-get -y install \
   zlib1g-dev libexpat1-dev libmpc-dev \
   libglib2.0-dev libfdt-dev libpixman-1-dev 
 
-mkdir riscv && cd riscv
+mkdir riscv
+cd riscv
 
 mkdir _install
 export PATH=`pwd`/_install/bin:$PATH
