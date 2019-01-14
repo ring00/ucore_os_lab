@@ -1,6 +1,0 @@
-*.o
-*.d
-tmp
-bbl
-bbl.bin
-bbl.s
