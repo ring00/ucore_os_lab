@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt-get update
 sudo apt-get -y install \
   binutils build-essential libtool texinfo \
@@ -7,36 +9,34 @@ sudo apt-get -y install \
   zlib1g-dev libexpat1-dev libmpc-dev \
   libglib2.0-dev libfdt-dev libpixman-1-dev 
 
-mkdir riscv
-cd riscv
+mkdir riscv && cd riscv
+
 mkdir _install
 export PATH=`pwd`/_install/bin:$PATH
 
 # gcc, binutils, newlib
 git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
 pushd riscv-gnu-toolchain
-./configure --prefix=`pwd`/../_install --enable-multilib
+./configure --prefix=`pwd`/../_install --enable-multilib --disable-gdb
 make -j`nproc`
 popd
 
 # qemu
-git clone https://github.com/riscv/riscv-qemu
-pushd riscv-qemu
-./configure --prefix=`pwd`/../_install --target-list=riscv32-softmmu,riscv64-softmmu,riscv64-linux-user,riscv32-linux-user
+wget https://download.qemu.org/qemu-3.1.0.tar.xz
+tar -xf qemu-3.1.0.tar.xz
+pushd qemu-3.1.0
+./configure --prefix=`pwd`/../_install --target-list=riscv32-softmmu,riscv32-linux-user,riscv64-softmmu,riscv64-linux-user
 make -j`nproc` install
 popd
 
 # LLVM
-# git clone https://git.llvm.org/git/llvm.git
 git clone https://mirrors.tuna.tsinghua.edu.cn/git/llvm/llvm.git
 cd llvm/tools
-# git clone https://git.llvm.org/git/clang.git
 git clone https://mirrors.tuna.tsinghua.edu.cn/git/llvm/clang.git
 cd ..
-# [RISCV] Properly evaluate fixup_riscv_pcrel_lo12: https://reviews.llvm.org/D54029
 # [RISCV] Generate address sequences suitable for mcmodel=medium: https://reviews.llvm.org/D54143
-wget https://reviews.llvm.org/file/data/7tb5xptcbkl2nlna3jaf/PHID-FILE-kvwxxbq7mgcphluxdnld/D54143.diff
-git apply 0001-Codegen-for-mcmodel-medium.patch
+wget https://reviews.llvm.org/file/data/khhutlamvitbtmkst5vr/PHID-FILE-z5rasjekyqodswys6m6p/D54143.diff
+patch -p0 < D54143.diff
 mkdir build && cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
@@ -45,7 +45,7 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DDEFAULT_SYSROOT="../../_install/riscv64-unknown-elf" \
   -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-elf" \
   -DLLVM_TARGETS_TO_BUILD="" \
-  -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" ../
+  -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" ..
 cmake --build . --target install
 cd ../..
 
@@ -54,7 +54,7 @@ cat >hello.c <<END
 #include <stdio.h>
 
 int main(){
-  printf("Hello RISCV!\n");
+  printf("Hello RISC-V!\n");
   return 0;
 }
 END
