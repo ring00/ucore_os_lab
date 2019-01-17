@@ -243,9 +243,9 @@
 #define barrier() __asm__ __volatile__ ("fence" ::: "memory")
 
 static inline void
-lcr3(unsigned long long cr3) {
+lcr3(unsigned int cr3) {
     cr3 >>= RISCV_PGSHIFT;
-    cr3 |= 0x8000000000000000;
+    cr3 |= SATP32_MODE;
     asm volatile ("csrw satp, %0" :: "r"(cr3));
 }
 

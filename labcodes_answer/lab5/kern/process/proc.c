@@ -794,36 +794,22 @@ do_kill(int pid) {
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
 kernel_execve(const char *name, unsigned char *binary, size_t size) {
-    int ret, len = strlen(name);
-    // asm volatile (
-    //     "int %1;"
-    //     : "=a" (ret)
-    //     : "i" (T_SYSCALL), "0" (SYS_exec), "d" (name), "c" (len), "b" (binary), "D" (size)
-    //     : "memory");
-    asm volatile(
-        "li a0, %1\n"
-        "lw a1, %2\n"
-        "lw a2, %3\n"
-        "lw a3, %4\n"
-        "lw a4, %5\n"
-        "li a7, 10\n"
-        "ecall\n"
-        "sw a0, %0"
-        : "=m"(ret)
-        : "i"(SYS_exec), "m"(name), "m"(len), "m"(binary), "m"(size)
-        : "memory");
-    // do_execve(name, len, binary, size);
-    // asm volatile("sret");
-    // uintptr_t sstatus = read_csr(sstatus);
-    // sstatus = INSERT_FIELD(sstatus, SSTATUS_SPP, PRV_U);
-    // sstatus = INSERT_FIELD(sstatus, SSTATUS_SPIE, 0);
-    // write_csr(sstatus, sstatus);
-    // write_csr(mscratch, MACHINE_STACK_TOP() - MENTRY_FRAME_SIZE);
-    // write_csr(mepc, fn);
-    // write_csr(sptbr, (uintptr_t)root_page_table >> RISCV_PGSHIFT);
-    // asm volatile("mv a0, %0; mv sp, %0; mret" : : "r"(stack));
-    // __builtin_unreachable();
-    return ret;
+    int len = strlen(name);
+
+    register uintptr_t a0 asm ("a0") = (uintptr_t)(SYS_exec);
+    register uintptr_t a1 asm ("a1") = (uintptr_t)(name);
+    register uintptr_t a2 asm ("a2") = (uintptr_t)(len);
+    register uintptr_t a3 asm ("a3") = (uintptr_t)(binary);
+    register uintptr_t a4 asm ("a4") = (uintptr_t)(size);
+    register uintptr_t a7 asm ("a7") = (uintptr_t)(20);
+    asm volatile (
+        "ecall"
+        : "+r"(a0)
+        : "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a7)
+        : "memory"
+    );
+
+    return a0;
 }
 
 #define __KERNEL_EXECVE(name, binary, size) ({                          \
