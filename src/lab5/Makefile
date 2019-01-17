@@ -1,14 +1,16 @@
-PROJ	:= lab8
+PROJ	:= lab5
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
 
 V       := @
 
+# try to infer the correct GCCPREFX
 ifndef GCCPREFIX
 GCCPREFIX := riscv64-unknown-elf-
 endif
 
+# try to infer the correct QEMU
 ifndef QEMU
 QEMU := qemu-system-riscv64
 endif
@@ -24,6 +26,7 @@ endif
 .DELETE_ON_ERROR:
 
 # define compiler and flags
+
 HOSTCC		:= gcc
 HOSTCFLAGS	:= -Wall -O2
 
@@ -59,11 +62,11 @@ ALLOBJS	:=
 ALLDEPS	:=
 TARGETS	:=
 
-USER_PREFIX	:= __user_
-
 include tools/function.mk
 
 listf_cc = $(call listf,$(1),$(CTYPE))
+
+USER_PREFIX	:= __user_
 
 # for cc
 add_files_cc = $(call add_files,$(1),$(CC),$(CFLAGS) $(3),$(2),$(4))
@@ -127,67 +130,6 @@ endef
 $(foreach p,$(call read_packet,uprog),$(eval $(call uprog_ld,$(p))))
 
 # -------------------------------------------------------------------
-
-# create bootblock
-# bootfiles = $(call listf_cc,boot)
-# $(foreach f,$(bootfiles),$(call cc_compile,$(f),$(CC),$(CFLAGS) -Os -nostdinc))
-
-# bootblock = $(call totarget,bootblock)
-
-# $(bootblock): $(call toobj,boot/bootasm.S) $(call toobj,$(bootfiles)) | $(call totarget,sign)
-# 	@echo + ld $@
-# 	$(V)$(LD) $(LDFLAGS) -N -T tools/boot.ld $^ -o $(call toobj,bootblock)
-# 	@$(OBJDUMP) -S $(call objfile,bootblock) > $(call asmfile,bootblock)
-# 	@$(OBJCOPY) -S -O binary $(call objfile,bootblock) $(call outfile,bootblock)
-# 	@$(call totarget,sign) $(call outfile,bootblock) $(bootblock)
-
-# $(call create_target,bootblock)
-
-# -------------------------------------------------------------------
-
-# create 'sign' tools
-# $(call add_files_host,tools/sign.c,sign,sign)
-# $(call create_target_host,sign,sign)
-
-# -------------------------------------------------------------------
-# create 'mksfs' tools
-$(call add_files_host,tools/mksfs.c,mksfs,mksfs)
-$(call create_target_host,mksfs,mksfs)
-
-# -------------------------------------------------------------------
-# create swap.img
-SWAPIMG		:= $(call totarget,swap.img)
-
-$(SWAPIMG):
-	$(V)dd if=/dev/zero of=$@ bs=4kB count=8
-
-$(call create_target,swap.img)
-
-# -------------------------------------------------------------------
-# create sfs.img
-SFSIMG		:= $(call totarget,sfs.img)
-SFSBINS		:=
-SFSROOT		:= disk0
-
-define fscopy
-__fs_bin__ := $(2)$(SLASH)$(patsubst $(USER_PREFIX)%,%,$(basename $(notdir $(1))))
-SFSBINS += $$(__fs_bin__)
-$$(__fs_bin__): $(1) | $$$$(dir $@)
-	@$(COPY) $$< $$@
-endef
-
-$(foreach p,$(USER_BINS),$(eval $(call fscopy,$(p),$(SFSROOT)$(SLASH))))
-
-$(SFSROOT):
-	$(V)$(MKDIR) $@
-
-$(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1kB count=640
-	@$(call totarget,mksfs) $@ $(SFSROOT)
-
-$(call create_target,sfs.img)
-
-# -------------------------------------------------------------------
 # kernel
 
 KINCLUDE	+= kern/debug/ \
@@ -197,14 +139,9 @@ KINCLUDE	+= kern/debug/ \
 			   kern/libs/ \
 			   kern/sync/ \
 			   kern/fs/    \
-			   kern/process/ \
-			   kern/schedule/ \
-			   kern/syscall/  \
-			   kern/fs/swap/ \
-			   kern/fs/vfs/ \
-			   kern/fs/devs/ \
-			   kern/fs/sfs/
-
+			   kern/process \
+			   kern/schedule \
+			   kern/syscall
 
 KSRCDIR		+= kern/init \
 			   kern/libs \
@@ -216,11 +153,7 @@ KSRCDIR		+= kern/init \
 			   kern/fs    \
 			   kern/process \
 			   kern/schedule \
-			   kern/syscall  \
-			   kern/fs/swap \
-			   kern/fs/vfs \
-			   kern/fs/devs \
-			   kern/fs/sfs
+			   kern/syscall
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
@@ -233,20 +166,21 @@ kernel = $(call totarget,kernel)
 
 $(kernel): tools/kernel.ld
 
-$(kernel): $(KOBJS) $(SWAPIMG) $(SFSIMG)
+$(kernel): $(KOBJS) $(USER_BINS)
 	@echo + ld $@
-	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) --format=binary $(SWAPIMG) $(SFSIMG) --format=default
+	$(V)$(LD) $(LDFLAGS) -T tools/kernel.ld -o $@ $(KOBJS) --format=binary $(USER_BINS) --format=default
 	@$(OBJDUMP) -S $@ > $(call asmfile,kernel)
 	@$(OBJDUMP) -t $@ | $(SED) '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $(call symfile,kernel)
 
 $(call create_target,kernel)
 
 # -------------------------------------------------------------------
+
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../src/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
@@ -261,8 +195,6 @@ IGNORE_ALLDEPS	= clean \
 				  print-.+ \
 				  run-.+ \
 				  build-.+ \
-				  sh-.+ \
-				  script-.+ \
 				  handin
 
 ifeq ($(call match,$(MAKECMDGOALS),$(IGNORE_ALLDEPS)),0)
@@ -275,16 +207,14 @@ TARGETS: $(TARGETS)
 
 .DEFAULT_GOAL := TARGETS
 
-QEMUOPTS = -hda $(UCOREIMG) -drive file=$(SWAPIMG),media=disk,cache=writeback -drive file=$(SFSIMG),media=disk,cache=writeback 
+QEMUOPTS = -hda $(UCOREIMG) -drive file=$(SWAPIMG),media=disk,cache=writeback
 
 .PHONY: qemu spike
-qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+qemu: $(UCOREIMG)
 	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic
 
-spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+spike: $(UCOREIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
-
-TERMINAL := gnome-terminal
 
 RUN_PREFIX	:= _binary_$(OBJDIR)_$(USER_PREFIX)
 MAKEOPTS	:= --quiet --no-print-directory
@@ -292,19 +222,13 @@ MAKEOPTS	:= --quiet --no-print-directory
 run-%: build-%
 	$(V)$(SPIKE) $(UCOREIMG)
 
-sh-%: script-%
-	$(V)$(QEMU) -parallel stdio $(QEMUOPTS) -serial null
-
 run-nox-%: build-%
 	$(V)$(QEMU) -serial mon:stdio $(QEMUOPTS) -nographic
 
 build-%: touch
-	$(V)$(MAKE) $(MAKEOPTS) "DEFS+=-DTEST=$*" 
+	$(V)$(MAKE) $(MAKEOPTS) "DEFS+=-DTEST=$* -DTESTSTART=$(RUN_PREFIX)$*_out_start -DTESTSIZE=$(RUN_PREFIX)$*_out_size"
 
-script-%: touch
-	$(V)$(MAKE) $(MAKEOPTS) "DEFS+=-DTEST=sh -DTESTSCRIPT=/script/$*"
-
-.PHONY: grade touch buildfs
+.PHONY: grade touch
 
 GRADE_GDB_IN	:= .gdb.in
 GRADE_QEMU_OUT	:= .qemu.out
@@ -324,10 +248,10 @@ touch:
 print-%:
 	@echo $($(shell echo $(patsubst print-%,%,$@) | $(TR) [a-z] [A-Z]))
 
-.PHONY: clean dist-clean handin packall tags
+.PHONY: clean dist-clean handin packall
 clean:
-	$(V)$(RM) $(GRADE_GDB_IN) $(GRADE_QEMU_OUT)  $(SFSBINS) cscope* tags
-	$(V)$(RM) -r $(OBJDIR) $(BINDIR) $(SFSROOT)
+	$(V)$(RM) $(GRADE_GDB_IN) $(GRADE_QEMU_OUT)
+	-$(RM) -r $(OBJDIR) $(BINDIR)
 
 dist-clean: clean
 	-$(RM) $(HANDIN)
@@ -339,9 +263,3 @@ packall: clean
 	@$(RM) -f $(HANDIN)
 	@tar -czf $(HANDIN) `find . -type f -o -type d | grep -v '^\.*$$' | grep -vF '$(HANDIN)'`
 
-tags:
-	@echo TAGS ALL
-	$(V)rm -f cscope.files cscope.in.out cscope.out cscope.po.out tags
-	$(V)find . -type f -name "*.[chS]" >cscope.files
-	$(V)cscope -bq 
-	$(V)ctags -L cscope.files

@@ -131,7 +131,7 @@ $(call create_target,kernel)
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel)  --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../src/$(PROJ)/$(kernel)  --disable-fp-emulation --enable-logo && make && cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 

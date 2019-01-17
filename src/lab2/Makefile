@@ -1,4 +1,4 @@
-PROJ	:= lab4
+PROJ	:= lab2
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
@@ -31,7 +31,7 @@ GDB		:= $(GCCPREFIX)gdb
 
 CC		:= clang
 CFLAGS  := -mcmodel=medium -march=rv64ima -mabi=lp64 -std=gnu99 -Wno-unused
-CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
+CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
 
@@ -98,20 +98,15 @@ KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
 			   kern/trap/ \
 			   kern/mm/ \
-			   kern/sync/ \
-			   kern/fs/ \
-			   kern/process \
-			   kern/schedule
+			   kern/arch/ \
+			   kern/sync/
 
 KSRCDIR		+= kern/init \
 			   kern/libs \
 			   kern/debug \
 			   kern/driver \
 			   kern/trap \
-			   kern/mm \
-			   kern/fs \
-			   kern/process \
-			   kern/schedule
+			   kern/mm
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
@@ -138,7 +133,7 @@ $(call create_target,kernel)
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --host=riscv64-unknown-elf --with-payload=../../src/$(PROJ)/$(kernel) --disable-fp-emulation --enable-log && make && cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
@@ -165,7 +160,7 @@ TARGETS: $(TARGETS)
 
 .PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic
 
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
