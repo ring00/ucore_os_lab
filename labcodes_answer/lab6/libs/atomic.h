@@ -30,20 +30,26 @@ static inline bool test_and_clear_bit(int nr, volatile void *addr)
 #define BIT_MASK(nr) (1UL << ((nr) % BITS_PER_LONG))
 #define BIT_WORD(nr) ((nr) / BITS_PER_LONG)
 
-#define __test_and_op_bit(op, mod, nr, addr)                         \
-    ({                                                               \
-        unsigned long __res, __mask;                                 \
-        __mask = BIT_MASK(nr);                                       \
-        __asm__ __volatile__(__AMO(op) " %0, %2, %1"                 \
-                             : "=r"(__res), "+A"(addr[BIT_WORD(nr)]) \
-                             : "r"(mod(__mask)));                    \
-        ((__res & __mask) != 0);                                     \
+#define __test_and_op_bit(op, mod, nr, addr)                    \
+    ({                                                          \
+        unsigned long __res, __addr, __mask;                    \
+        __mask = BIT_MASK(nr);                                  \
+        __addr = (unsigned long)&addr[BIT_WORD(nr)];            \
+        __asm__ __volatile__(__AMO(op) " %0, %2, (%1)"          \
+                             : "=r"(__res)                      \
+                             : "r"(__addr), "r"(mod(__mask)));  \
+        ((__res & __mask) != 0);                                \
     })
 
-#define __op_bit(op, mod, nr, addr)                 \
-    __asm__ __volatile__(__AMO(op) " zero, %1, %0"  \
-                         : "+A"(addr[BIT_WORD(nr)]) \
-                         : "r"(mod(BIT_MASK(nr))))
+#define __op_bit(op, mod, nr, addr)                             \
+    ({                                                          \
+        unsigned long __addr, __mask;                           \
+        __addr = (unsigned long)&addr[BIT_WORD(nr)];            \
+        __mask = BIT_MASK(nr);                                  \
+        __asm__ __volatile__(__AMO(op) " zero, %1, (%0)"        \
+                            :                                   \
+                            : "r"(__addr), "r"(mod(__mask)));   \
+    })
 
 /* Bitmask modifiers */
 #define __NOP(x) (x)

@@ -2,18 +2,16 @@
 
     .altmacro
     .macro SAVE_ALL
-    LOCAL _restore_kernel_sp
-    LOCAL _save_context
 
     # If coming from userspace, preserve the user stack pointer and load
     # the kernel stack pointer. If we came from the kernel, sscratch
     # will contain 0, and we should continue on the current stack.
     csrrw sp, sscratch, sp
-    bnez sp, _save_context
+    bnez sp, 2f
 
-_restore_kernel_sp:
+1:
     csrr sp, sscratch
-_save_context:
+2:
     addi sp, sp, -36 * REGBYTES
     # save x registers
     STORE x0, 0*REGBYTES(sp)
@@ -54,7 +52,7 @@ _save_context:
     csrrw s0, sscratch, x0
     csrr s1, sstatus
     csrr s2, sepc
-    csrr s3, sbadaddr
+    csrr s3, stval
     csrr s4, scause
 
     STORE s0, 2*REGBYTES(sp)
@@ -65,20 +63,18 @@ _save_context:
     .endm
 
     .macro RESTORE_ALL
-    LOCAL _save_kernel_sp
-    LOCAL _restore_context
 
     LOAD s1, 32*REGBYTES(sp)
     LOAD s2, 33*REGBYTES(sp)
 
     andi s0, s1, SSTATUS_SPP
-    bnez s0, _restore_context
+    bnez s0, 2f
 
-_save_kernel_sp:
+1:
     # Save unwound kernel stack pointer in sscratch
     addi s0, sp, 36 * REGBYTES
     csrw sscratch, s0
-_restore_context:
+2:
     csrw sstatus, s1
     csrw sepc, s2
 
