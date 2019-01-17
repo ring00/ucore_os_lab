@@ -41,7 +41,7 @@
     csrr s0, sscratch
     csrr s1, sstatus
     csrr s2, sepc
-    csrr s3, sbadaddr
+    csrr s3, stval
     csrr s4, scause
 
     STORE s0, 2*REGBYTES(sp)
