@@ -794,7 +794,7 @@ do_kill(int pid) {
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
 kernel_execve(const char *name, unsigned char *binary, size_t size) {
-    int len = strlen(name);
+    uintptr_t len = strlen(name);
 
     register uintptr_t a0 asm ("a0") = (uintptr_t)(SYS_exec);
     register uintptr_t a1 asm ("a1") = (uintptr_t)(name);

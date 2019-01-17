@@ -244,7 +244,9 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, SATP32_MODE | (cr3 >> RISCV_PGSHIFT));
+    cr3 >>= RISCV_PGSHIFT;
+    cr3 |= SATP32_MODE;
+    asm volatile ("csrw satp, %0" :: "r"(cr3));
 }
 
 #endif

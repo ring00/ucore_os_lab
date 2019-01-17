@@ -233,7 +233,9 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, cr3 >> RISCV_PGSHIFT);
+    cr3 >>= RISCV_PGSHIFT;
+    cr3 |= 0x80000000;
+    asm volatile ("csrw satp, %0" :: "r"(cr3));
 }
 
 #endif

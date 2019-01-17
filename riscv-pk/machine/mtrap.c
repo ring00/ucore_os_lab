@@ -177,7 +177,7 @@ send_ipi:
 #endif
       break;
     default:
-      redirect_trap(read_csr(mepc), read_csr(mstatus), read_csr(mbadaddr));
+      redirect_trap(read_csr(mepc), read_csr(mstatus), read_csr(mtval));
       retval = -ENOSYS;
       break;
   }
@@ -186,7 +186,7 @@ send_ipi:
 
 void redirect_trap(uintptr_t epc, uintptr_t mstatus, uintptr_t badaddr)
 {
-  write_csr(sbadaddr, badaddr);
+  write_csr(stval, badaddr);
   write_csr(sepc, epc);
   write_csr(scause, read_csr(mcause));
   write_csr(mepc, read_csr(stvec));
