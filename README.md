@@ -22,3 +22,6 @@ $ ./clangbuildall.sh
 $ cd lab8
 $ make qemu
 ```
+## Demo
+
+[![asciicast](https://asciinema.org/a/yJ5c8TA1I7q2qOfHIg7C11qIL.svg)](https://asciinema.org/a/yJ5c8TA1I7q2qOfHIg7C11qIL)
