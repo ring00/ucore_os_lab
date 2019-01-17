@@ -969,22 +969,24 @@ do_kill(int pid) {
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
 kernel_execve(const char *name, const char **argv) {
-    int argc = 0, ret;
+	uintptr_t argc = 0;
     while (argv[argc] != NULL) {
-        argc ++;
+        argc++;
     }
-    asm volatile(
-        "li a0, %1\n"
-        "lw a1, %2\n"
-        "lw a2, %3\n"
-        "lw a3, %4\n"
-        "li a7, 10\n"
-        "ecall\n"
-        "sw a0, %0"
-        : "=m"(ret)
-        : "i"(SYS_exec), "m"(name), "m"(argc), "m"(argv)
-        : "memory");
-    return ret;
+
+    register uintptr_t a0 asm ("a0") = (uintptr_t)(SYS_exec);
+    register uintptr_t a1 asm ("a1") = (uintptr_t)(name);
+    register uintptr_t a2 asm ("a2") = (uintptr_t)(argc);
+    register uintptr_t a3 asm ("a3") = (uintptr_t)(argv);
+    register uintptr_t a7 asm ("a7") = (uintptr_t)(20);
+    asm volatile (
+        "ecall"
+        : "+r"(a0)
+        : "r"(a1), "r"(a2), "r"(a3), "r"(a7)
+        : "memory"
+    );
+
+    return a0;
 }
 
 #define __KERNEL_EXECVE(name, path, ...) ({                         \

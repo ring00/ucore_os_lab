@@ -212,18 +212,18 @@
   __tmp; })
 
 #define write_csr(reg, val) ({ \
-  asm volatile ("csrw " #reg ", %0" :: "rK"(val)); })
+  asm volatile ("csrw " #reg ", %0" :: "r"(val)); })
 
 #define swap_csr(reg, val) ({ unsigned long __tmp; \
-  asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "rK"(val)); \
+  asm volatile ("csrrw %0, " #reg ", %1" : "=r"(__tmp) : "r"(val)); \
   __tmp; })
 
 #define set_csr(reg, bit) ({ unsigned long __tmp; \
-  asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit)); \
+  asm volatile ("csrrs %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
   __tmp; })
 
 #define clear_csr(reg, bit) ({ unsigned long __tmp; \
-  asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit)); \
+  asm volatile ("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "r"(bit)); \
   __tmp; })
 
 #define rdtime() read_csr(time)
@@ -244,7 +244,9 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, SATP32_MODE | (cr3 >> RISCV_PGSHIFT));
+    cr3 >>= RISCV_PGSHIFT;
+    cr3 |= SATP32_MODE;
+    asm volatile ("csrw satp, %0" :: "r"(cr3));
 }
 
 #endif

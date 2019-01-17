@@ -29,8 +29,8 @@ HOSTCFLAGS	:= -Wall -O2
 
 GDB		:= $(GCCPREFIX)gdb
 
-CC		:= $(GCCPREFIX)gcc
-CFLAGS  := -mcmodel=medany -O2 -std=gnu99 -Wno-unused
+CC		:= clang
+CFLAGS	:= -mcmodel=medium -march=rv32ima -mabi=ilp32 -std=gnu99 -Wno-unused
 CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
@@ -182,7 +182,7 @@ $(SFSROOT):
 	$(V)$(MKDIR) $@
 
 $(SFSIMG): $(SFSROOT) $(SFSBINS) | $(call totarget,mksfs)
-	$(V)dd if=/dev/zero of=$@ bs=1kB count=480
+	$(V)dd if=/dev/zero of=$@ bs=1kB count=640
 	@$(call totarget,mksfs) $@ $(SFSROOT)
 
 $(call create_target,sfs.img)
@@ -246,7 +246,17 @@ $(call create_target,kernel)
 UCOREIMG	:= $(call totarget,ucore.img)
 
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv32-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cd ../../riscv-pk && \
+	rm -rf build && \
+	mkdir build && \
+	cd build && \
+	../configure \
+		--host=riscv32-unknown-elf \
+		--with-payload=../../labcodes_answer/$(PROJ)/$(kernel) \
+		--disable-fp-emulation \
+		--enable-logo && \
+	make && \
+	cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
