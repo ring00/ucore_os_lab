@@ -3,7 +3,7 @@
 ## Install LLVM
 
 ```bash
-$ bash build-llvm.sh
+$ bash setup.sh
 ```
 
 All necessary tools including GCC, Clang and QEMU will be installed in `riscv/_install`.
@@ -12,9 +12,10 @@ You can add them to your `PATH` environment variable by executing `export PATH=$
 ## Build uCore
 
 ```bash
-$ cd labcodes_answer
+$ cd src
 $ ./clangbuildall.sh
 ```
+
 ## Run uCore
 
 ```bash
