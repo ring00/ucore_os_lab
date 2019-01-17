@@ -1,4 +1,4 @@
-PROJ	:= lab3
+PROJ	:= lab2
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
@@ -24,6 +24,7 @@ endif
 .DELETE_ON_ERROR:
 
 # define compiler and flags
+# define compiler and flags
 HOSTCC		:= gcc
 HOSTCFLAGS	:= -Wall -O2
 
@@ -31,7 +32,7 @@ GDB		:= $(GCCPREFIX)gdb
 
 CC		:= clang
 CFLAGS	:= -mcmodel=medium -march=rv32ima -mabi=ilp32 -std=gnu99 -Wno-unused
-CFLAGS	+= -fno-builtin -nostdinc $(DEFS)
+CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
 
@@ -98,16 +99,15 @@ KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
 			   kern/trap/ \
 			   kern/mm/ \
-			   kern/sync/ \
-			   kern/fs/
+			   kern/arch/ \
+			   kern/sync/
 
 KSRCDIR		+= kern/init \
 			   kern/libs \
 			   kern/debug \
 			   kern/driver \
 			   kern/trap \
-			   kern/mm \
-			   kern/fs
+			   kern/mm
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
@@ -128,6 +128,8 @@ $(kernel): $(KOBJS)
 
 $(call create_target,kernel)
 
+# -------------------------------------------------------------------
+
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
@@ -138,11 +140,11 @@ $(UCOREIMG): $(kernel)
 	cd build && \
 	../configure \
 		--host=riscv32-unknown-elf \
-		--with-payload=../../labcodes_answer/$(PROJ)/$(kernel) \
+		--with-payload=../../src/$(PROJ)/$(kernel) \
 		--disable-fp-emulation \
 		--enable-logo && \
 	make && \
-	cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
@@ -213,5 +215,5 @@ tags:
 	@echo TAGS ALL
 	$(V)rm -f cscope.files cscope.in.out cscope.out cscope.po.out tags
 	$(V)find . -type f -name "*.[chS]" >cscope.files
-	$(V)cscope -bq
+	$(V)cscope -bq 
 	$(V)ctags -L cscope.files

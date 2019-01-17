@@ -1,4 +1,4 @@
-PROJ	:= lab4
+PROJ	:= lab1
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
@@ -31,13 +31,13 @@ GDB		:= $(GCCPREFIX)gdb
 
 CC		:= clang
 CFLAGS	:= -mcmodel=medium -march=rv32ima -mabi=ilp32 -std=gnu99 -Wno-unused
-CFLAGS	+= -fno-builtin -Wall -nostdinc $(DEFS)
+CFLAGS	+= -fno-builtin -Wall -O2 -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
 
 LD      := $(GCCPREFIX)ld
 LDFLAGS	:= -m elf32lriscv
-LDFLAGS	+= -nostdlib --gc-sections --print-gc-sections
+LDFLAGS	+= -nostdlib --gc-sections
 
 OBJCOPY := $(GCCPREFIX)objcopy
 OBJDUMP := $(GCCPREFIX)objdump
@@ -98,20 +98,14 @@ KINCLUDE	+= kern/debug/ \
 			   kern/driver/ \
 			   kern/trap/ \
 			   kern/mm/ \
-			   kern/sync/ \
-			   kern/fs/ \
-			   kern/process \
-			   kern/schedule
+			   kern/arch/
 
 KSRCDIR		+= kern/init \
 			   kern/libs \
 			   kern/debug \
 			   kern/driver \
 			   kern/trap \
-			   kern/mm \
-			   kern/fs \
-			   kern/process \
-			   kern/schedule
+			   kern/mm
 
 KCFLAGS		+= $(addprefix -I,$(KINCLUDE))
 
@@ -133,7 +127,6 @@ $(kernel): $(KOBJS)
 $(call create_target,kernel)
 
 # -------------------------------------------------------------------
-
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
@@ -144,11 +137,11 @@ $(UCOREIMG): $(kernel)
 	cd build && \
 	../configure \
 		--host=riscv32-unknown-elf \
-		--with-payload=../../labcodes_answer/$(PROJ)/$(kernel) \
+		--with-payload=../../src/$(PROJ)/$(kernel) \
 		--disable-fp-emulation \
 		--enable-logo && \
 	make && \
-	cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 

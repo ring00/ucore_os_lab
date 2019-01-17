@@ -1,4 +1,4 @@
-PROJ	:= lab7
+PROJ	:= lab6
 EMPTY	:=
 SPACE	:= $(EMPTY) $(EMPTY)
 SLASH	:= /
@@ -184,11 +184,11 @@ $(UCOREIMG): $(kernel)
 	cd build && \
 	../configure \
 		--host=riscv32-unknown-elf \
-		--with-payload=../../labcodes_answer/$(PROJ)/$(kernel) \
+		--with-payload=../../src/$(PROJ)/$(kernel) \
 		--disable-fp-emulation \
 		--enable-logo && \
 	make && \
-	cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	cp bbl ../../src/$(PROJ)/$(UCOREIMG)
 
 $(call create_target,ucore.img)
 
