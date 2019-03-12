@@ -23,6 +23,3 @@ $ cd lab8
 $ make qemu
 ```
 
-## Demo
-
-[![asciicast](https://asciinema.org/a/shxXAG3ohjvAJIjE23F4vh9FI.svg)](https://asciinema.org/a/shxXAG3ohjvAJIjE23F4vh9FI)
