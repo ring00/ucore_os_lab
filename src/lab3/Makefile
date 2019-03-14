@@ -29,8 +29,13 @@ HOSTCFLAGS	:= -Wall -O2
 
 GDB		:= $(GCCPREFIX)gdb
 
+ifdef USELLVM
 CC		:= clang
 CFLAGS	:= -mcmodel=medium -march=rv32ima -mabi=ilp32 -std=gnu99 -Wno-unused
+else
+CC		:= $(GCCPREFIX)gcc
+CFLAGS	:= -mcmodel=medany -std=gnu99 -Wno-unused
+endif
 CFLAGS	+= -fno-builtin -nostdinc $(DEFS)
 CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
