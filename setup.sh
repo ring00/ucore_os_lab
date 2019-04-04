@@ -36,8 +36,8 @@ cd llvm/tools
 git clone https://mirrors.tuna.tsinghua.edu.cn/git/llvm/clang.git
 cd ..
 # [RISCV] Generate address sequences suitable for mcmodel=medium: https://reviews.llvm.org/D54143
-wget https://reviews.llvm.org/file/data/khhutlamvitbtmkst5vr/PHID-FILE-z5rasjekyqodswys6m6p/D54143.diff
-patch -p0 < D54143.diff
+# wget https://reviews.llvm.org/file/data/khhutlamvitbtmkst5vr/PHID-FILE-z5rasjekyqodswys6m6p/D54143.diff
+# patch -p0 < D54143.diff
 mkdir build
 cd build
 cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
@@ -50,3 +50,4 @@ cmake -G Ninja -DCMAKE_BUILD_TYPE="Release" \
   -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" ..
 cmake --build . --target install
 cd ../..
+
